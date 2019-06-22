@@ -1,4 +1,4 @@
-infile = ARGV[0]
+infile   = ARGV[0]
 basename = File.basename(infile, ".xlsx")
 
 
@@ -7,8 +7,9 @@ require 'rubyXL/convenience_methods'
 require 'pry'
 require 'yaml'
 
-def wrap(s, width=78)
-  s.gsub(/(.{1,#{width}})(\s+|\Z)/, "\\1\n")
+def wrap(s, width = 78)
+  paragraphs = s.split("\n\n").map { |ps| ps.gsub(/(.{1,#{width}})(\s+|\Z)/, "\\1\n") }
+  paragraphs.join("\n")
 end
 
 # encoding: UTF-8
@@ -77,7 +78,7 @@ def get_families(model)
       result[family_id][:plac] = person["Hochz-in"]
     else # es ist ein Kind
       family_id = %Q{#{famroot}.0#{person["Aus-Ehe"]}}
-      result[family_id][:child].push(personid) rescue puts ("familie #{family_id} zu #{personid} fehlt")
+      result[family_id][:child].push(personid) rescue puts("familie #{family_id} zu #{personid} fehlt")
 
       fampart = person["Geschl"] == "M" ? :husb : :wife
       fams.each do |spouse|
@@ -126,10 +127,10 @@ def get_indi(personmodel)
   ausehe = personmodel["AusEhe"]
   art    = personmodel["AusEhe"]
 
-  beruf = wrap(personmodel["Beruf"] || "" , 80).strip
+  beruf = wrap(personmodel["Beruf"] || "", 80).strip
 
   family_roles = (personmodel[:family_roles] || []).map { |v| %Q{1 #{v[1].to_s.upcase} @#{ $idmapper.fam(v[0])  }@} }.join("\n")
-  maiden = (personmodel[:family_roles] || []).map { |v| %Q{1 #{v[1].to_s.upcase} @#{ $idmapper.fam(v[0])  }@} }.join("\n")
+  maiden       = (personmodel[:family_roles] || []).map { |v| %Q{1 #{v[1].to_s.upcase} @#{ $idmapper.fam(v[0])  }@} }.join("\n")
 
   %Q{
 0 @#{$idmapper.indi(id)}@ INDI
@@ -146,11 +147,73 @@ def get_indi(personmodel)
 1 DEAT
 2 DATE #{personmodel["Gest-am"]}
 2 PLAC #{personmodel["Gest-in"]}
-#{family_roles}
+  #{family_roles}
   }.strip
 
 end
 
+def get_md_name(personmodel)
+  npfx           = personmodel["Titel"]
+  name           = personmodel["Name"]
+  name           = personmodel["Geb-Name"]
+  rufname        = personmodel["Rufname"]&.strip
+  vorname        = personmodel["Vorname"]
+  id             = personmodel["Ord-Nr"]
+  vornamerufname = vorname.gsub(rufname, %Q{*#{rufname.strip}*}) unless rufname.nil?
+  %Q{#{name}, #{vornamerufname} (#{id})}
+end
+
+def get_md_beruf(personmodel, quote)
+  %Q{#{personmodel["Beruf"]&.split("\n")&.join("\n#{quote}")}}
+end
+
+def md_indi(personmodel)
+  name      = get_md_name(personmodel)
+  md_person = %Q{
+<!--  -->
+# #{name}
+
+>
+>#{get_md_beruf(personmodel, '>')}
+>
+> - geb. #{personmodel["Geb-am"]} in #{personmodel["Geb-in"]}
+> - gest. #{personmodel["Gest-am"]} in #{personmodel["Gst-in"]}}
+
+  md_hochzeit = personmodel[:relatives]&.select { |i| i["Art"] == 'Ehe' }&.map do |i|
+    %Q{
+> - Hochzeit am #{i["Hochz-am"]} in #{i["Hochz-in"]} mit
+>
+>> #{get_md_name(i)}
+>>
+>>>#{get_md_beruf(i, '>>>')}
+>>
+>> - geb. #{i["Geb-am"]} in #{i["Geb-in"]}
+>> - gest. #{i["Gest-am"]} in #{i["Gest-in"]}
+>>
+}
+  end
+
+  md_kinder = personmodel[:relatives]&.select { |i| i["Art"] == 'Kind' }&.map do |i|
+    %Q{
+>> 1. #{get_md_name(i)}
+>>
+>>    #{get_md_beruf(i, '>>   ')}
+>>
+>>    - geb. #{i["Geb-am"]} in #{i["Geb-in"]}
+>>    - gest. #{i["Gest-am"]} in #{i["Gest-in"]}
+>>}
+  end
+
+  unless md_kinder.nil?
+    md_kinder = %Q{
+> -  **Kinder**
+
+#{md_kinder.join}
+    }
+  end
+
+  [md_person, md_hochzeit, md_kinder].join("")
+end
 
 # expose a particluar family as gedcom
 def ged_fam(family_id, family)
@@ -201,13 +264,23 @@ class IdSanitizer
   def to_gedcom(id, clazz = "X")
     result = @idmap[id]
     unless result
-      result     = id.gsub(/[^a-zA-Z0-9_]/, "_")
+      result = id.gsub(/[^a-zA-Z0-9_]/, "_")
       #@nextnumber += 1
       @idmap[id] = result
     end
     %Q{#{clazz}#{result}}
   end
 end
+
+
+def patch_relatives(model)
+  relatives = model.group_by { |key, person| person["Ang-Von"] }
+  # .last comes from the somehow complex model
+  model.keys.each { |i| model[i][:relatives] = relatives[i]&.map { |j| j.last } }
+end
+
+
+#####################################################
 
 $idmapper = IdSanitizer.new
 
@@ -216,14 +289,15 @@ workbook = RubyXL::Parser.parse(infile)
 
 model = convert_xlsx_to_genealog_model(workbook)
 
+
 families     = get_families(model)
 family_roles = get_family_roles(families)
 
+patch_relatives(model)
+patch_family_roles(family_roles, model)
 File.open("inputs/#{basename}.debug.yaml", "w:UTF-8") do |f|
   f.puts({families: families, family_roles: family_roles, model: model}.to_yaml)
 end
-patch_family_roles(family_roles, model)
-
 
 
 File.open("gedcom/#{basename}.ged", "w:UTF-8") do |f|
@@ -239,4 +313,11 @@ File.open("gedcom/#{basename}.ged", "w:UTF-8") do |f|
   end
 
   f.puts "0 TRLR" # was requested by yed
+end
+
+
+File.open("mdreport/#{basename}.test.md", "w:UTF-8") do |f|
+  model.keys.each do |id|
+    f.puts md_indi(model[id]) if model[id][:relatives]
+  end
 end
