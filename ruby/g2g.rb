@@ -1,4 +1,3 @@
-
 infile = ARGV[0]
 basename = File.basename(infile, ".xlsx")
 
@@ -7,6 +6,10 @@ require 'rubyXL'
 require 'rubyXL/convenience_methods'
 require 'pry'
 require 'yaml'
+
+def wrap(s, width=78)
+  s.gsub(/(.{1,#{width}})(\s+|\Z)/, "\\1\n")
+end
 
 # encoding: UTF-8
 
@@ -27,10 +30,10 @@ def convert_xlsx_to_genealog_model(workbook)
 end
 
 # jede person hat potenziell eine Familie
-# x.y.01  - fam x.y.01
-# x.y.02  - fam x.y.02
-# x.y.1   - fam x.y.0{ausEhe}
-# a.b.c   - fam a.b.00 - auch hier ist ausEhe 0
+# x.y.01  - family_id x.y.01
+# x.y.02  - family_id x.y.02
+# x.y.1   - family_id x.y.0{ausEhe}
+# a.b.c   - family_id a.b.00 - auch hier ist ausEhe 0
 # im grunde kann jeder Eintrag zu einer Familie führen
 #
 # family = {husb: [], wife: [], child: []}   families with members
@@ -39,8 +42,8 @@ end
 def get_families(model)
   result = model.keys.inject({}) do |result, personid|
     ["", ".00"].each do |i|
-      fam         = "#{personid}#{i}"
-      result[fam] = {id: fam, child: [], husb: [], wife: []}
+      family_id         = "#{personid}#{i}"
+      result[family_id] = {id: family_id, child: [], husb: [], wife: []}
     end
     result["..00"] = {id: "..00", child: [], husb: [], wife: []}
     result
@@ -61,22 +64,25 @@ def get_families(model)
       fams = spouses.map { |i| %Q{#{i}} }
     end
 
-
+    family_id = %Q{#{personid}}
     if person["Art"] == "Ehe"
       if person["Geschl"] == "M"
-        result[personid][:husb] = [personid]
-        result[personid][:wife] = [famroot]
+        result[family_id][:husb] = [personid]
+        result[family_id][:wife] = [famroot]
       else
-        result[personid][:wife] = [personid]
-        result[personid][:husb] = [famroot]
+        result[family_id][:wife] = [personid]
+        result[family_id][:husb] = [famroot]
       end
+      result[family_id][:date] = person["Hochz-am"]
+      result[family_id][:plac] = person["Hochz-in"]
     else # es ist ein Kind
-      fam = %Q{#{famroot}.0#{person["Aus-Ehe"]}}
-      result[fam][:child].push(personid) rescue puts ("familie #{fam} zu #{personid} fehlt")
+      family_id = %Q{#{famroot}.0#{person["Aus-Ehe"]}}
+      result[family_id][:child].push(personid) rescue puts ("familie #{family_id} zu #{personid} fehlt")
 
       fampart = person["Geschl"] == "M" ? :husb : :wife
       fams.each do |spouse|
-        result[spouse][fampart] = [personid]
+        family_id                  = "#{spouse}"
+        result[family_id][fampart] = [personid]
       end
     end
 
@@ -87,8 +93,8 @@ def get_families(model)
 end
 
 def get_family_roles(families)
-  personroles={husb: 'FAMS', wife: 'FAMS', child: 'FAMC'}
-  result = families.inject({}) do |result, (family_id, family)|
+  personroles = {husb: 'FAMS', wife: 'FAMS', child: 'FAMC'}
+  result      = families.inject({}) do |result, (family_id, family)|
     [:husb, :wife, :child].each do |role|
       family[role].each do |person_id|
         result[person_id] ||= []
@@ -101,28 +107,38 @@ def get_family_roles(families)
 end
 
 def patch_family_roles(family_roles, model)
-   family_roles.each do |k, v|
-     model[k][:family_roles] = v
-   end
+  family_roles.each do |k, v|
+    model[k][:family_roles] = v
+  end
 end
 
 # expose an individual as gedcom
 def get_indi(personmodel)
+  id             = personmodel["Ord-Nr"]
+  npfx           = personmodel["Titel"]
+  name           = personmodel["Name"]
+  name           = personmodel["Geb-Name"]
+  rufname        = personmodel["Rufname"]&.strip
+  vorname        = personmodel["Vorname"]
+  vornamerufname = vorname #.gsub(rufname, %Q{*#{rufname.strip}*}) unless rufname.nil?
 
-  id      = personmodel["Ord-Nr"]
-  name    = personmodel["Name"]
-  vorname = personmodel["Vorname"]
-  sex     = {"M" => "M", "W" => "F"}[personmodel["Geschl"]]
-  ausehe  = personmodel["AusEhe"]
-  art     = personmodel["AusEhe"]
+  sex    = personmodel["Geschl"] == "M" ? "M" : "F"
+  ausehe = personmodel["AusEhe"]
+  art    = personmodel["AusEhe"]
 
+  beruf = wrap(personmodel["Beruf"] || "" , 80).strip
 
-  family_roles = (personmodel[:family_roles] || []).map{|v| %Q{1 #{v[1].to_s.upcase} @#{$idmapper.fam(v[0])}@}}.join("\n")
+  family_roles = (personmodel[:family_roles] || []).map { |v| %Q{1 #{v[1].to_s.upcase} @#{ $idmapper.fam(v[0])  }@} }.join("\n")
+  maiden = (personmodel[:family_roles] || []).map { |v| %Q{1 #{v[1].to_s.upcase} @#{ $idmapper.fam(v[0])  }@} }.join("\n")
 
   %Q{
 0 @#{$idmapper.indi(id)}@ INDI
-1 NAME #{vorname} /#{name}/ (#{id})
-1 NOTE #{personmodel["Beruf"]}
+1 NAME #{vornamerufname}  /#{name}/ (#{id})
+2 GiVN #{vornamerufname}
+2 SURN #{name}
+2 NPFX #{npfx}
+2 _RUFNAME #{rufname}
+1 NOTE #{beruf.gsub("\n", "\n2 CONT ")}
 1 SEX #{sex}
 1 BIRT
 2 DATE #{personmodel["Geb-am"]}
@@ -141,10 +157,10 @@ def ged_fam(family_id, family)
   child = family[:child].map { |c| %Q{1 CHIL @#{$idmapper.indi(c)}@} }
   husb  = family[:husb].map { |c| %Q{1 HUSB @#{$idmapper.indi(c)}@} }
   wife  = family[:wife].map { |c| %Q{1 WIFE @#{$idmapper.indi(c)}@} }
+
   %Q{
 0 @#{$idmapper.fam(family_id)}@ FAM
-#{[child, husb, wife].flatten.compact.join("\n")}}
-
+#{[child, husb, wife].flatten.compact.join("\n")}}.strip
 end
 
 
@@ -193,8 +209,8 @@ class IdSanitizer
   end
 end
 
-
 $idmapper = IdSanitizer.new
+
 
 workbook = RubyXL::Parser.parse(infile)
 
@@ -206,6 +222,7 @@ family_roles = get_family_roles(families)
 File.open("inputs/#{basename}.debug.yaml", "w:UTF-8") do |f|
   f.puts({families: families, family_roles: family_roles, model: model}.to_yaml)
 end
+patch_family_roles(family_roles, model)
 
 
 
@@ -221,6 +238,5 @@ File.open("gedcom/#{basename}.ged", "w:UTF-8") do |f|
     f.puts ged_fam(k, v)
   end
 
-  f.puts "0 TRLR"   # was requested by yed
-
+  f.puts "0 TRLR" # was requested by yed
 end
