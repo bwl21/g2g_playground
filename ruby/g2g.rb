@@ -22,7 +22,7 @@ def convert_xlsx_to_genealog_model(workbook)
   (2 .. rows).each do |rowid|
     rowmodel = {}
     labels.each_with_index do |key, colid|
-      rowmodel[key] = workbook[0][rowid][colid]&.value rescue binding.pry
+      rowmodel[key] = workbook[0][rowid][colid]&.value&.to_s&.strip rescue binding.pry
     end
     model[rowmodel["Ord-Nr"]] = rowmodel unless rowmodel["Ord-Nr"].nil?
 
@@ -58,6 +58,8 @@ def get_families(model)
     relatives = model.keys.select { |i| i.match(/^#{personid.gsub(".", "\.")}\.\d+$/) }
     spouses   = relatives.select { |i| i.split(".").last.start_with? "0" }
 
+    famc = nil
+    fams = nil
     if person["Art"] == "Ehe" # ehepartner begründen die Familie
       fams = [personid]
     else
@@ -77,8 +79,8 @@ def get_families(model)
       result[family_id][:date] = person["Hochz-am"]
       result[family_id][:plac] = person["Hochz-in"]
     else # es ist ein Kind
-      family_id = %Q{#{famroot}.0#{person["Aus-Ehe"]}}
-      result[family_id][:child].push(personid) rescue puts("familie #{family_id} zu #{personid} fehlt")
+      family_id = %Q{#{famroot}.0#{person["Aus-Ehe"]}}  # Familienzuodnung über Aus-Ehe errechnen
+      result[family_id][:child].push(personid) rescue  puts ("familie #{family_id} zu #{personid} fehlt")
 
       fampart = person["Geschl"] == "M" ? :husb : :wife
       fams.each do |spouse|
@@ -113,6 +115,7 @@ def patch_family_roles(family_roles, model)
   end
 end
 
+
 # expose an individual as gedcom
 def get_indi(personmodel)
   id             = personmodel["Ord-Nr"]
@@ -134,13 +137,14 @@ def get_indi(personmodel)
 
   %Q{
 0 @#{$idmapper.indi(id)}@ INDI
-1 NAME #{vornamerufname}  /#{name}/ (#{id})
+1 NAME #{vornamerufname} (#{id}) /#{name}/
 2 GiVN #{vornamerufname}
 2 SURN #{name}
 2 NPFX #{npfx}
 2 _RUFNAME #{rufname}
 1 NOTE #{beruf.gsub("\n", "\n2 CONT ")}
 1 SEX #{sex}
+1 REFN #{id}
 1 BIRT
 2 DATE #{personmodel["Geb-am"]}
 2 PLAC #{personmodel["Geb-in"]}
@@ -167,6 +171,16 @@ def get_md_beruf(personmodel, quote)
   %Q{#{personmodel["Beruf"]&.split("\n")&.join("\n#{quote}")}}
 end
 
+def mk_md_death(personmodel)
+  if personmodel["Gest-am"]
+    gest_in = personmodel["Gst-in"]
+    gest_in = gest_in ? " in #{gest_in}": ""
+    %Q{- gest. #{personmodel["Gest-am"]} #{gest_in}}
+  else
+    ''
+  end
+end
+
 def md_indi(personmodel)
   name      = get_md_name(personmodel)
   md_person = %Q{
@@ -177,7 +191,7 @@ def md_indi(personmodel)
 >#{get_md_beruf(personmodel, '>')}
 >
 > - geb. #{personmodel["Geb-am"]} in #{personmodel["Geb-in"]}
-> - gest. #{personmodel["Gest-am"]} in #{personmodel["Gst-in"]}}
+> #{mk_md_death(personmodel)}}
 
   md_hochzeit = personmodel[:relatives]&.select { |i| i["Art"] == 'Ehe' }&.map do |i|
     %Q{
@@ -188,7 +202,7 @@ def md_indi(personmodel)
 >>>#{get_md_beruf(i, '>>>')}
 >>
 >> - geb. #{i["Geb-am"]} in #{i["Geb-in"]}
->> - gest. #{i["Gest-am"]} in #{i["Gest-in"]}
+>> #{mk_md_death(i)}
 >>
 }
   end
@@ -200,11 +214,11 @@ def md_indi(personmodel)
 >>    #{get_md_beruf(i, '>>   ')}
 >>
 >>    - geb. #{i["Geb-am"]} in #{i["Geb-in"]}
->>    - gest. #{i["Gest-am"]} in #{i["Gest-in"]}
+>>    #{mk_md_death(i)}
 >>}
   end
 
-  unless md_kinder.nil?
+  unless md_kinder.empty?
     md_kinder = %Q{
 > -  **Kinder**
 
@@ -288,6 +302,11 @@ $idmapper = IdSanitizer.new
 workbook = RubyXL::Parser.parse(infile)
 
 model = convert_xlsx_to_genealog_model(workbook)
+
+File.open("inputs/#{basename}.yaml", "w:UTF-8") do |f|
+  f.puts(model.to_yaml)
+end
+
 
 
 families     = get_families(model)

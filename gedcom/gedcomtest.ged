@@ -10,7 +10,7 @@
 2 VERS 5.5.1
 1 LANG German
 0 @I4_5_6_3@ INDI
-1 NAME vmeins  /Test1/ (4.5.6.3)
+1 NAME vmeins (4.5.6.3) /Test1/
 2 GiVN vmeins
 2 SURN Test1
 2 NPFX 
@@ -24,6 +24,7 @@
 2 CONT et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata
 2 CONT sanctus est Lorem ipsum dolor sit amet.
 1 SEX M
+1 REFN 4.5.6.3
 1 BIRT
 2 DATE 01.01.1947
 2 PLAC Adorf
@@ -33,7 +34,7 @@
   1 FAMS @F4_5_6_3_01@
 1 FAMS @F4_5_6_3_02@
 0 @I4_5_6_3_01@ INDI
-1 NAME vwzwei  /test101/ (4.5.6.3.01)
+1 NAME vwzwei (4.5.6.3.01) /test101/
 2 GiVN vwzwei
 2 SURN test101
 2 NPFX 
@@ -46,6 +47,7 @@
 2 CONT blafasel usw.nochmal lorem ipusum blafasel usw.nochmal lorem ipusum blafasel
 2 CONT usw.
 1 SEX F
+1 REFN 4.5.6.3.01
 1 BIRT
 2 DATE 01.01.1948
 2 PLAC Bdorf
@@ -54,13 +56,14 @@
 2 PLAC 
   1 FAMS @F4_5_6_3_01@
 0 @I4_5_6_3_02@ INDI
-1 NAME vwdei  /Test102/ (4.5.6.3.02)
+1 NAME vwdei (4.5.6.3.02) /Test102/
 2 GiVN vwdei
 2 SURN Test102
 2 NPFX 
 2 _RUFNAME vwdrei
 1 NOTE ohne testberfu
 1 SEX F
+1 REFN 4.5.6.3.02
 1 BIRT
 2 DATE 01.01.1949
 2 PLAC Adorf
@@ -69,13 +72,14 @@
 2 PLAC 
   1 FAMS @F4_5_6_3_02@
 0 @I4_5_6_3_1@ INDI
-1 NAME vmvier vmfuenf vmsehcs (gennant "wie genannt")  /Test1/ (4.5.6.3.1)
+1 NAME vmvier vmfuenf vmsehcs (gennant "wie genannt") (4.5.6.3.1) /Test1/
 2 GiVN vmvier vmfuenf vmsehcs (gennant "wie genannt")
 2 SURN Test1
 2 NPFX 
 2 _RUFNAME vmfuenf
 1 NOTE 
 1 SEX M
+1 REFN 4.5.6.3.1
 1 BIRT
 2 DATE 01.01.1970
 2 PLAC Bdorf
@@ -84,13 +88,14 @@
 2 PLAC 
   1 FAMC @F4_5_6_3_01@
 0 @I4_5_6_3_2@ INDI
-1 NAME vmsieben-vmacht vmneu  /Test1/ (4.5.6.3.2)
+1 NAME vmsieben-vmacht vmneu (4.5.6.3.2) /Test1/
 2 GiVN vmsieben-vmacht vmneu
 2 SURN Test1
 2 NPFX 
 2 _RUFNAME vmsieben-vmacht
 1 NOTE 
 1 SEX M
+1 REFN 4.5.6.3.2
 1 BIRT
 2 DATE 01.01.1971
 2 PLAC Bdorf
@@ -99,13 +104,14 @@
 2 PLAC 
   1 FAMC @F4_5_6_3_02@
 0 @I4_5_6_3_3@ INDI
-1 NAME vwdrei-vwvier vwfuenf vwsechs  /Test1/ (4.5.6.3.3)
+1 NAME vwdrei-vwvier vwfuenf vwsechs (4.5.6.3.3) /Test1/
 2 GiVN vwdrei-vwvier vwfuenf vwsechs
 2 SURN Test1
 2 NPFX 
 2 _RUFNAME vwdrei-vwvier
 1 NOTE 
 1 SEX M
+1 REFN 4.5.6.3.3
 1 BIRT
 2 DATE 01.01.1972
 2 PLAC Bdorf

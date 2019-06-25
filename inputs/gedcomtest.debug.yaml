@@ -82,7 +82,7 @@
     Angelegt-um: 
     Gedruckt-am: 22.10.2001
     Gedruckt-um: '15:21'
-    P-Nr.: "  1631"
+    P-Nr.: '1631'
     :relatives:
     - &7
       Ord-Nr: 4.5.6.3.01
@@ -94,7 +94,7 @@
         luptatum delenit aigue excepteur sint occae. Et harumd dereud facilis est
         er expedit distinct. Nam libe soluta nobis eligent optio \n\nnochmal \"lorem
         ipusum\" \nblafasel usw.nochmal lorem ipusum blafasel usw.nochmal lorem ipusum
-        blafasel usw.\n\n"
+        blafasel usw."
       Geb-am: 01.01.1948
       Geb-in: Bdorf
       Gest-am: 
@@ -120,7 +120,7 @@
       Angelegt-um: 
       Gedruckt-am: 22.10.2001
       Gedruckt-um: '15:21'
-      P-Nr.: "  1632"
+      P-Nr.: '1632'
       :relatives: 
       :family_roles: *1
     - &8
@@ -155,7 +155,7 @@
       Angelegt-um: 
       Gedruckt-am: 22.10.2001
       Gedruckt-um: '15:20'
-      P-Nr.: "  1634"
+      P-Nr.: '1634'
       :relatives: 
       :family_roles: *2
     - &9
@@ -190,7 +190,7 @@
       Angelegt-um: 
       Gedruckt-am: 22.10.2001
       Gedruckt-um: '15:18'
-      P-Nr.: "  1633"
+      P-Nr.: '1633'
       :relatives: 
       :family_roles: *3
     - &10
@@ -225,7 +225,7 @@
       Angelegt-um: 
       Gedruckt-am: 24.04.2001
       Gedruckt-um: '15:05'
-      P-Nr.: "  1635"
+      P-Nr.: '1635'
       :relatives: 
       :family_roles: *4
     - &11
@@ -260,7 +260,7 @@
       Angelegt-um: 
       Gedruckt-am: 04.06.1994
       Gedruckt-um: '11:20'
-      P-Nr.: "  1687"
+      P-Nr.: '1687'
       :relatives: 
       :family_roles: *5
     :family_roles: *6
