@@ -1,5 +1,5 @@
 infile   = ARGV[0]
-basename = File.basename(infile, ".xlsx")
+basename = File.basename(infile, ".*")
 
 
 require 'rubyXL'
@@ -55,6 +55,8 @@ def get_families(model)
     person  = model[personid]
     famroot = person["Ang-Von"]
 
+   # return(result) if famroot.nil?   # if there is no relative ...
+
     relatives = model.keys.select { |i| i.match(/^#{personid.gsub(".", "\.")}\.\d+$/) }
     spouses   = relatives.select { |i| i.split(".").last.start_with? "0" }
 
@@ -63,7 +65,7 @@ def get_families(model)
     if person["Art"] == "Ehe" # ehepartner begründen die Familie
       fams = [personid]
     else
-      famc = [%Q{#{famroot}.0#{person["Aus-Ehe"]}}] # elternfamilie
+      famc = [%Q{#{famroot}.0#{person["Aus-Ehe"]}}] # elternfamilie unless famroot.nil?
       fams = spouses.map { |i| %Q{#{i}} }
     end
 
@@ -71,10 +73,10 @@ def get_families(model)
     if person["Art"] == "Ehe"
       if person["Geschl"] == "M"
         result[family_id][:husb] = [personid]
-        result[family_id][:wife] = [famroot]
+        result[family_id][:wife] = [famroot] unless famroot
       else
         result[family_id][:wife] = [personid]
-        result[family_id][:husb] = [famroot]
+        result[family_id][:husb] = [famroot] unless famroot
       end
       result[family_id][:date] = person["Hochz-am"]
       result[family_id][:plac] = person["Hochz-in"]
@@ -299,13 +301,13 @@ end
 $idmapper = IdSanitizer.new
 
 
-if File.extname(infile) == ".yaml"
-  model = YAML.load_file(infile)
+if File.extname(infile) == ".json"
+  model = JSON.load(File.read(infile))
 else
   workbook = RubyXL::Parser.parse(infile)
   model = convert_xlsx_to_genealog_model(workbook)
-  File.open("inputs/#{basename}.yaml", "w:UTF-8") do |f|
-    f.puts(model.to_yaml)
+  File.open("inputs/#{basename}.json", "w:UTF-8") do |f|
+    f.puts(JSON.pretty_generate model)
   end
 end
 
