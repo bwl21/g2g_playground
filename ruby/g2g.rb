@@ -299,14 +299,15 @@ end
 $idmapper = IdSanitizer.new
 
 
-workbook = RubyXL::Parser.parse(infile)
-
-model = convert_xlsx_to_genealog_model(workbook)
-
-File.open("inputs/#{basename}.yaml", "w:UTF-8") do |f|
-  f.puts(model.to_yaml)
+if File.extname(infile) == ".yaml"
+  model = YAML.load_file(infile)
+else
+  workbook = RubyXL::Parser.parse(infile)
+  model = convert_xlsx_to_genealog_model(workbook)
+  File.open("inputs/#{basename}.yaml", "w:UTF-8") do |f|
+    f.puts(model.to_yaml)
+  end
 end
-
 
 
 families     = get_families(model)

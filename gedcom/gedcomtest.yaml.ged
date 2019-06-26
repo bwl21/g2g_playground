@@ -1,0 +1,131 @@
+0 HEAD
+1 CHAR UTF-8
+1 COPR Bernhard Weichel
+1 DATE 13.6.2019
+2 TIME 14:19:43
+1 DEST ANSTFILE
+1 FILE Muster_GEDCOM.ged
+1 GEDC
+2 FORM LINEAGE-LINKED
+2 VERS 5.5.1
+1 LANG German
+0 @I4_5_6_3@ INDI
+1 NAME vmeins (4.5.6.3) /Test1/
+2 GiVN vmeins
+2 SURN Test1
+2 NPFX 
+2 _RUFNAME vmeins
+1 NOTE Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
+2 CONT tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At
+2 CONT vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,
+2 CONT no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit
+2 CONT amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut
+2 CONT labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam
+2 CONT et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata
+2 CONT sanctus est Lorem ipsum dolor sit amet.
+1 SEX M
+1 REFN 4.5.6.3
+1 BIRT
+2 DATE 01.01.1947
+2 PLAC Adorf
+1 DEAT
+2 DATE 
+2 PLAC 
+  1 FAMS @F4_5_6_3_01@
+1 FAMS @F4_5_6_3_02@
+0 @I4_5_6_3_01@ INDI
+1 NAME vwzwei (4.5.6.3.01) /test101/
+2 GiVN vwzwei
+2 SURN test101
+2 NPFX 
+2 _RUFNAME vwzwei
+1 NOTE nulla pariatur. At vver eos et accusam dignissum qui blandit est praesent
+2 CONT luptatum delenit aigue excepteur sint occae. Et harumd dereud facilis est er
+2 CONT expedit distinct. Nam libe soluta nobis eligent optio 
+2 CONT 
+2 CONT nochmal "lorem ipusum" 
+2 CONT blafasel usw.nochmal lorem ipusum blafasel usw.nochmal lorem ipusum blafasel
+2 CONT usw.
+1 SEX F
+1 REFN 4.5.6.3.01
+1 BIRT
+2 DATE 01.01.1948
+2 PLAC Bdorf
+1 DEAT
+2 DATE 
+2 PLAC 
+  1 FAMS @F4_5_6_3_01@
+0 @I4_5_6_3_02@ INDI
+1 NAME vwdei (4.5.6.3.02) /Test102/
+2 GiVN vwdei
+2 SURN Test102
+2 NPFX 
+2 _RUFNAME vwdrei
+1 NOTE ohne testberfu
+1 SEX F
+1 REFN 4.5.6.3.02
+1 BIRT
+2 DATE 01.01.1949
+2 PLAC Adorf
+1 DEAT
+2 DATE 
+2 PLAC 
+  1 FAMS @F4_5_6_3_02@
+0 @I4_5_6_3_1@ INDI
+1 NAME vmvier vmfuenf vmsehcs (gennant "wie genannt") (4.5.6.3.1) /Test1/
+2 GiVN vmvier vmfuenf vmsehcs (gennant "wie genannt")
+2 SURN Test1
+2 NPFX 
+2 _RUFNAME vmfuenf
+1 NOTE 
+1 SEX M
+1 REFN 4.5.6.3.1
+1 BIRT
+2 DATE 01.01.1970
+2 PLAC Bdorf
+1 DEAT
+2 DATE 
+2 PLAC 
+  1 FAMC @F4_5_6_3_01@
+0 @I4_5_6_3_2@ INDI
+1 NAME vmsieben-vmacht vmneu (4.5.6.3.2) /Test1/
+2 GiVN vmsieben-vmacht vmneu
+2 SURN Test1
+2 NPFX 
+2 _RUFNAME vmsieben-vmacht
+1 NOTE 
+1 SEX M
+1 REFN 4.5.6.3.2
+1 BIRT
+2 DATE 01.01.1971
+2 PLAC Bdorf
+1 DEAT
+2 DATE 
+2 PLAC 
+  1 FAMC @F4_5_6_3_02@
+0 @I4_5_6_3_3@ INDI
+1 NAME vwdrei-vwvier vwfuenf vwsechs (4.5.6.3.3) /Test1/
+2 GiVN vwdrei-vwvier vwfuenf vwsechs
+2 SURN Test1
+2 NPFX 
+2 _RUFNAME vwdrei-vwvier
+1 NOTE 
+1 SEX M
+1 REFN 4.5.6.3.3
+1 BIRT
+2 DATE 01.01.1972
+2 PLAC Bdorf
+1 DEAT
+2 DATE 
+2 PLAC 
+  1 FAMC @F4_5_6_3_02@
+0 @F4_5_6_3_01@ FAM
+1 CHIL @I4_5_6_3_1@
+1 HUSB @I4_5_6_3@
+1 WIFE @I4_5_6_3_01@
+0 @F4_5_6_3_02@ FAM
+1 CHIL @I4_5_6_3_2@
+1 CHIL @I4_5_6_3_3@
+1 HUSB @I4_5_6_3@
+1 WIFE @I4_5_6_3_02@
+0 TRLR
